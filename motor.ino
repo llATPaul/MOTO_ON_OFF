@@ -1,28 +1,26 @@
-#include <CurieBLE.h> //non la usa esclusivamente, alterna questa con ArduinoBLE!!!
+#include <CurieBLE.h> //derivato da CurieBLE->Peripheral->LED Arduino 101 demo Sketch
 
-BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); //creo un'istanza Servizio
-BLEUnsignedCharCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite); //creo caratteristica come UCHAR
-
-// ****   bleCharateristic::value() restituisce uint8_t* non stringa ---->                                                          
-// ****  (https://github.com/arduino-libraries/ArduinoBLE/blob/master/src/BLECharacteristic.h), riga 58
+BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); 
+BLEUnsignedCharCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite); 
 
 
-const int ledPin = 13;                                //non commentare, lasciare attivo come indicatore di accensione/spegnimento su scheda          
-
-void setup()                                          //verificare funzionamento con alimentazione esterna!!!
+// const int ledPin = 13;                               
+void setup()                                          
 {
   Serial.begin(9600);
-  pinMode(ledPin, OUTPUT);                            //modificare ed aggiungere pin dei relè                    
+  //pinMode(ledPin, OUTPUT); 
+  pinMode(8, OUTPUT); 
+  pinMode(9, OUTPUT); 
   BLE.begin();                                    
 
-  BLE.setLocalName("LED");             
-  BLE.setAdvertisedService(ledService);               //imposto il servizio da collegare all'oggetto Servizio
+  BLE.setLocalName("MODULO CONTROLLO MOTORE");             
+  BLE.setAdvertisedService(ledService);               
 
-  ledService.addCharacteristic(switchCharacteristic); //imposto relativa caratteristica, setto a 0 
+  ledService.addCharacteristic(switchCharacteristic); 
   BLE.addService(ledService);
   switchCharacteristic.setValue(0);
 
-  BLE.advertise();                                    //diffondo
+  BLE.advertise();                                   
 
   Serial.println("Setup OK!");
 }
@@ -40,15 +38,19 @@ void loop()
       if (switchCharacteristic.written()) 
       {
         int readValue = switchCharacteristic.value();
-        if (readValue == 97)                     //coerente con macro su nFC Connect, ricrodarsi di valutarlo come UINT
+        if (readValue == 97)                     
         {   
           Serial.println("LED on");
-          digitalWrite(ledPin, HIGH);            //qui codice per avvio 
+          digitalWrite(8, HIGH);
+          delay (500);
+          digitalWrite(8, LOW);
         } 
-        else if (readValue == 98)                //coerente con macro su nFC Connect, , ricrodarsi di valutarlo come UINT
+        else if (readValue == 98)                
         {                             
           Serial.println(F("LED off"));
-          digitalWrite(ledPin, LOW);             //qui codice per stop
+          digitalWrite(9, HIGH);
+          delay (500);
+          digitalWrite(9, LOW);
         }
       }
     }
